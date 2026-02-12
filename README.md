@@ -3,8 +3,6 @@
 A modern, colorful, browser-based local video player that allows users to play videos directly from their computer **without installing any software**.
 Built using pure HTML, CSS, and JavaScript.
 
-Direct Link: https://vishalkumar-netizen.github.io/Video-Player-/
-(Open web page and see the results)
 
 ---
 
