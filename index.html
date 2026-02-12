@@ -1,194 +1,193 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Ultra Pro Video Player</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vishal Player - Local Video Player</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
 
-<style>
-body {
-  margin: 0;
-  background: #000;
-  font-family: Arial, sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
+    body {
+      background: linear-gradient(135deg, #141414, #1f1f1f);
+      color: white;
+      min-height: 100vh;
+    }
 
-.player-container {
-  position: relative;
-  width: 95%;
-  max-width: 1000px;
-  background: #111;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 0 30px rgba(255,0,0,0.4);
-}
+    header {
+      padding: 20px;
+      text-align: center;
+      background: #e50914;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
 
-video {
-  width: 100%;
-  height: auto;
-  background: black;
-}
+    .container {
+      padding: 20px;
+      max-width: 1000px;
+      margin: auto;
+    }
 
-.controls {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-  padding: 10px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+    .upload-section {
+      text-align: center;
+      margin-bottom: 20px;
+      padding: 20px;
+      border: 2px dashed #e50914;
+      border-radius: 12px;
+      background: #222;
+    }
 
-button, select, input {
-  background: rgba(255,255,255,0.1);
-  color: white;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-}
+    input[type="file"] {
+      margin: 10px 0;
+      padding: 10px;
+      background: #e50914;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
 
-button:hover {
-  background: rgba(255,0,0,0.8);
-}
+    video {
+      width: 100%;
+      border-radius: 12px;
+      margin-top: 20px;
+      background: black;
+    }
 
-.progress {
-  flex: 1;
-}
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
+      justify-content: center;
+    }
 
-input[type="range"] {
-  width: 100%;
-}
+    button, select {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
 
-.file-upload {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 10;
-}
+    button {
+      background: #e50914;
+      color: white;
+    }
 
-.subtitle-upload {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 10;
-}
+    button:hover {
+      background: #ff1f2d;
+    }
 
-@media(max-width:600px){
-  .controls{
-    flex-wrap: wrap;
-  }
-}
-</style>
+    select {
+      background: #333;
+      color: white;
+    }
+
+    .guide {
+      margin-top: 30px;
+      padding: 20px;
+      background: #1c1c1c;
+      border-radius: 12px;
+    }
+
+    .guide h2 {
+      margin-bottom: 10px;
+      color: #e50914;
+    }
+
+    footer {
+      margin-top: 40px;
+      padding: 20px;
+      text-align: center;
+      background: #111;
+      font-size: 14px;
+      color: #aaa;
+    }
+  </style>
 </head>
-
 <body>
 
-<div class="player-container">
+<header>
+  🎬 Vishal Player - Netflix Style Local Video Player
+</header>
 
-  <div class="file-upload">
+<div class="container">
+
+  <div class="upload-section">
+    <h2>Select Your Local Video</h2>
     <input type="file" id="videoInput" accept="video/*">
+    <br>
+    <input type="file" id="subtitleInput" accept=".vtt,.srt">
   </div>
 
-  <div class="subtitle-upload">
-    <input type="file" id="subtitleInput" accept=".vtt">
-  </div>
-
-  <video id="video"></video>
+  <video id="videoPlayer" controls></video>
 
   <div class="controls">
-    <button id="playPause">▶</button>
-    <div class="progress">
-      <input type="range" id="seekBar" value="0" min="0" step="1">
-    </div>
-    <select id="speedControl">
-      <option value="0.5">0.5x</option>
-      <option value="1" selected>1x</option>
-      <option value="1.5">1.5x</option>
-      <option value="2">2x</option>
+    <button onclick="setSpeed(1)">1x</button>
+    <button onclick="setSpeed(1.5)">1.5x</button>
+    <button onclick="setSpeed(2)">2x</button>
+
+    <select onchange="setVolume(this.value)">
+      <option value="1">Volume 100%</option>
+      <option value="0.7">Volume 70%</option>
+      <option value="0.5">Volume 50%</option>
+      <option value="0.3">Volume 30%</option>
     </select>
-    <button id="fullscreen">⛶</button>
+  </div>
+
+  <div class="guide">
+    <h2>📖 How to Use</h2>
+    <p>1. Click on "Select Your Local Video" and choose any video from your computer.</p>
+    <p>2. (Optional) Upload subtitle file (.vtt or .srt).</p>
+    <p>3. Use playback speed buttons (1x, 1.5x, 2x).</p>
+    <p>4. Adjust volume from dropdown.</p>
+    <p>5. Enjoy watching without installing any software.</p>
+    <p><strong>Note:</strong> Works directly in browser. No data is uploaded to server.</p>
   </div>
 
 </div>
 
+<footer>
+  Project under GNU General Public License (GPL) <br>
+  Developer: Vishal Kumar Basson <br>
+  © 2026 Open Source Project
+</footer>
+
 <script>
-const video = document.getElementById('video');
-const playPause = document.getElementById('playPause');
-const seekBar = document.getElementById('seekBar');
-const speedControl = document.getElementById('speedControl');
-const fullscreenBtn = document.getElementById('fullscreen');
-const videoInput = document.getElementById('videoInput');
-const subtitleInput = document.getElementById('subtitleInput');
+  const videoInput = document.getElementById('videoInput');
+  const subtitleInput = document.getElementById('subtitleInput');
+  const videoPlayer = document.getElementById('videoPlayer');
 
-videoInput.addEventListener('change', function() {
-  const file = this.files[0];
-  if(file) {
-    video.src = URL.createObjectURL(file);
-  }
-});
-
-playPause.addEventListener('click', () => {
-  if(video.paused) {
-    video.play();
-    playPause.textContent = '⏸';
-  } else {
-    video.pause();
-    playPause.textContent = '▶';
-  }
-});
-
-video.addEventListener('timeupdate', () => {
-  seekBar.max = video.duration;
-  seekBar.value = video.currentTime;
-});
-
-seekBar.addEventListener('input', () => {
-  video.currentTime = seekBar.value;
-});
-
-speedControl.addEventListener('change', () => {
-  video.playbackRate = speedControl.value;
-});
-
-fullscreenBtn.addEventListener('click', () => {
-  if(video.requestFullscreen) {
-    video.requestFullscreen();
-  }
-});
-
-subtitleInput.addEventListener('change', function(){
-  const file = this.files[0];
-  if(file){
-    const track = document.createElement('track');
-    track.kind = 'subtitles';
-    track.label = 'Custom';
-    track.srclang = 'en';
-    track.src = URL.createObjectURL(file);
-    track.default = true;
-    video.appendChild(track);
-  }
-});
-
-// Double tap seek (mobile)
-let lastTap = 0;
-video.addEventListener('touchend', function(e) {
-  const currentTime = new Date().getTime();
-  const tapLength = currentTime - lastTap;
-  if (tapLength < 300 && tapLength > 0) {
-    const x = e.changedTouches[0].clientX;
-    if(x < window.innerWidth/2){
-      video.currentTime -= 10;
-    } else {
-      video.currentTime += 10;
+  videoInput.addEventListener('change', function () {
+    const file = this.files[0];
+    if (file) {
+      const fileURL = URL.createObjectURL(file);
+      videoPlayer.src = fileURL;
     }
+  });
+
+  subtitleInput.addEventListener('change', function () {
+    const file = this.files[0];
+    if (file) {
+      const track = document.createElement('track');
+      track.kind = 'subtitles';
+      track.label = 'Subtitle';
+      track.srclang = 'en';
+      track.src = URL.createObjectURL(file);
+      track.default = true;
+      videoPlayer.appendChild(track);
+    }
+  });
+
+  function setSpeed(speed) {
+    videoPlayer.playbackRate = speed;
   }
-  lastTap = currentTime;
-});
+
+  function setVolume(level) {
+    videoPlayer.volume = level;
+  }
 </script>
 
 </body>
