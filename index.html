@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<!--
+  Ultra Pro Local Video Player
+  Developer: Vishal Kumar Basson
+  License: GNU General Public License v3.0
+  Open Source Project
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ultra Pro Video Player</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000" />
+<link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:#000;
+  color:white;
+  font-family:Arial,Helvetica,sans-serif;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  min-height:100vh;
+}
+header{
+  padding:20px;
+  font-size:26px;
+  font-weight:bold;
+  color:#e50914;
+}
+.player-wrapper{
+  position:relative;
+  width:95%;
+  max-width:1100px;
+  margin-top:20px;
+}
+video{
+  width:100%;
+  border-radius:12px;
+  background:black;
+}
+.custom-controls{
+  position:absolute;
+  bottom:0;
+  width:100%;
+  background:linear-gradient(transparent,rgba(0,0,0,0.9));
+  padding:15px;
+  display:flex;
+  flex-direction:column;
+  opacity:0;
+  transition:0.3s;
+}
+.player-wrapper:hover .custom-controls{
+  opacity:1;
+}
+.progress{
+  width:100%;
+}
+.controls-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:8px;
+}
+button{
+  background:none;
+  border:none;
+  color:white;
+  font-size:16px;
+  cursor:pointer;
+}
+button:hover{color:#e50914}
+.upload{
+  margin-top:30px;
+  border:2px dashed #e50914;
+  padding:40px;
+  border-radius:12px;
+  cursor:pointer;
+  text-align:center;
+}
+footer{
+  margin-top:auto;
+  padding:20px;
+  font-size:14px;
+  opacity:0.7;
+}
+</style>
+</head>
+<body>
+
+<header>Ultra Pro Netflix-Style Video Player</header>
+
+<div class="upload" id="dropZone">
+Click or Drag & Drop Video File
+<input type="file" id="videoInput" accept="video/*" hidden>
+</div>
+
+<div class="player-wrapper" id="wrapper" style="display:none">
+  <video id="video"></video>
+  <div class="custom-controls">
+    <input type="range" id="progress" class="progress" value="0">
+    <div class="controls-row">
+      <div>
+        <button onclick="togglePlay()">▶/⏸</button>
+        <button onclick="skip(-10)">⏪ 10s</button>
+        <button onclick="skip(10)">10s ⏩</button>
+      </div>
+      <div>
+        <button onclick="setSpeed(0.5)">0.5x</button>
+        <button onclick="setSpeed(1)">1x</button>
+        <button onclick="setSpeed(1.5)">1.5x</button>
+        <button onclick="setSpeed(2)">2x</button>
+        <button onclick="toggleFullscreen()">⛶</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+Developer: Vishal Kumar Basson | GNU GPL v3.0 License | Open Source
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.6/dist/ffmpeg.min.js"></script>
+<script>
+const { createFFmpeg, fetchFile } = FFmpeg;
+const ffmpeg = createFFmpeg({ log: false });
+
+const video = document.getElementById("video");
+const progress = document.getElementById("progress");
+const wrapper = document.getElementById("wrapper");
+const videoInput = document.getElementById("videoInput");
+const dropZone = document.getElementById("dropZone");
+
+let lastTap = 0;
+
+async function loadVideoFile(file){
+  wrapper.style.display="block";
+  if(!ffmpeg.isLoaded()) await ffmpeg.load();
+
+  const name = file.name;
+  const ext = name.split('.').pop().toLowerCase();
+
+  if(["mp4","webm","ogg"].includes(ext)){
+    video.src = URL.createObjectURL(file);
+  } else {
+    ffmpeg.FS('writeFile', name, await fetchFile(file));
+    await ffmpeg.run('-i', name, 'output.mp4');
+    const data = ffmpeg.FS('readFile', 'output.mp4');
+    video.src = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
+  }
+}
+
+videoInput.addEventListener("change", e=> loadVideoFile(e.target.files[0]));
+dropZone.addEventListener("click", ()=> videoInput.click());
+dropZone.addEventListener("dragover", e=> e.preventDefault());
+dropZone.addEventListener("drop", e=>{e.preventDefault(); loadVideoFile(e.dataTransfer.files[0]);});
+
+function togglePlay(){ video.paused?video.play():video.pause(); }
+function skip(sec){ video.currentTime+=sec; }
+function setSpeed(s){ video.playbackRate=s; }
+function toggleFullscreen(){ if(!document.fullscreenElement) wrapper.requestFullscreen(); else document.exitFullscreen(); }
+
+video.addEventListener("timeupdate",()=>{
+  progress.value = (video.currentTime/video.duration)*100 || 0;
+});
+
+progress.addEventListener("input",()=>{
+  video.currentTime = (progress.value/100)*video.duration;
+});
+
+// Mobile Gesture Double Tap Seek
+video.addEventListener("touchend", function(e){
+  const currentTime = new Date().getTime();
+  const tapLength = currentTime - lastTap;
+  if (tapLength < 300 && tapLength > 0) {
+    const x = e.changedTouches[0].clientX;
+    if (x < window.innerWidth/2) video.currentTime -= 10;
+    else video.currentTime += 10;
+  }
+  lastTap = currentTime;
+});
+
+// Service Worker for PWA
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+</script>
+
+</body>
+</html>
